@@ -1,4 +1,5 @@
 import requests 
+import os
 
 # GitHub API
 url = "https://api.github.com/users/ntando-mv15/repos"
@@ -9,13 +10,18 @@ def github_api():
 
     data = response.json() 
     
+    repo_file = os.getenv('FILE_PATH')
+    
     # Iterate through the data 
     for repo in data:
         if status_code == 200:
             repo_name = repo["name"]
-            file_path = "/mnt/c/Users/NTAND/python-scripting/github-api/repos/repos.txt"
-            with open(file_path, "a") as new_file:    
+            with open(repo_file, "a") as new_file:    
                 new_file.write(repo_name + "\n")
+                print(f"Repository names saved to {file_path}")
+        else:
+            print(f"Failed to fetch data. HTTP Status Code: {response.status_code}")
+        
        
 github_api()
 
