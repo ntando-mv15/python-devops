@@ -11,8 +11,11 @@ def github_api():
     
     # Iterate through the data 
     for repo in data:
-        repo_name = repo["name"]
-        print(repo_name)
+        if status_code == 200:
+            repo_name = repo["name"]
+            file_path = "/mnt/c/Users/NTAND/python-scripting/github-api/repos/repos.txt"
+            with open(file_path, "a") as new_file:    
+                new_file.write(repo_name + "\n")
        
 github_api()
 
