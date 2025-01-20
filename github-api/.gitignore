@@ -1,3 +1,4 @@
 repos/
-
 .env
+__pycache__/
+*.zip
