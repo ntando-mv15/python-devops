@@ -16,10 +16,10 @@ def connect_to_docker():
         return None         # If connection fails, return None 
  
 
-def list_containers():
+def list_containers(client):
     
     try:
-        # List all containers (including stopped ones) 
+        # List all containers (both running and stopped ones) 
         container_list = client.containers.list(all=True)
         if not container_list:
             print("No containers found.")
@@ -32,52 +32,63 @@ def list_containers():
         print(f"Error listing containers: {e}")
         return None
 
-def start_container():
-    
+def start_container(client):
+    # Function allows user to start a stopped container
     try:
         
         stopped_containers = client.containers.list(filters={"status": "exited"})
         
-        # Ask user which container they would like to start
-        user_input = input("Please enter the container ID to restart: ")
+        # Prompts user to start a specific stopped container
+        user_input = input("Please enter the ID of a stopped container to start (Check list of containers for the ID): ")
         
-        container_id = client.containers.get(user_container)
+        container = client.containers.get(user_input)
         
-        if not container_id in stopped_containers:
+        if not container in stopped_containers:
             print("No container found.")
             
-        container_id.start()
-        print("Container {container_id} successfully started.")
+        else:
+            container.start()
+            print("Container successfully started.")
         
-        # Check if container restarted and is running
-        running_containers = client.containers.list()
-        print(running_containers)
+            # Refresh the container's status
+            container.reload()
+        
+            # Check if container restarted and is running
+            is_running = container.status
+            print(f"Container {container.name} is now {is_running}")
             
     except NotFound as e:
-        print(f"Error fetching container: {e}")   
+        print(f"Container not found with ID '{user_input}'. Please verify the ID and try again.")  
+    except APIError as e:
+        print(f"API error occurred while starting the container: {e}")   
     
 def stop_container(client):
-    
+    # Fucntion allows user to stop a running container
     try:
         
         running_containers = client.containers.list(filters={"status": "running"})
         
         # Ask user which container they would like to stop
-        user_container = input("Please enter the container ID to stop: ")
+        user_input = input("Please enter the ID of the running container to stop (Check list of containers for the ID): ")
         
-        container_id = client.containers.get(user_container)
+        container = client.containers.get(user_input)
         
-        if not container_id in running_containers:
+        if not container in running_containers:
             print("No container found.")
-            
-        container_id.stop()
-        print("Container successfully stopped.")
+        else:    
+            container.stop()
+            print("Container successfully stopped.")
         
-        # Check if container is running
-        stopped_containers = client.containers.list(filters={"status": "stopped"})
-        print(stopped_containers)
+            # Refresh the container's status
+            container.reload()
+        
+            # Check if container is running
+            is_stopped = container.status
+            print(f"Container {container.name} is now {is_stopped}")
             
-    except (NotFound, APIError) as e:
-        print(f"Error fetching container: {e}")
+    except NotFound as e:
+        print(f"Container not found with ID '{user_input}'. Please verify the ID and try again.")  
+    except APIError as e:
+        print(f"API error occurred while starting the container: {e}") 
       
 
